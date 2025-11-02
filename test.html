@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест - RUDEX Training</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Стили для теста */
+        .test-header {
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .test-title {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .test-progress {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Карточка вопроса */
+        .question-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        /* Варианты ответов */
+        .answers {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .answer {
+            padding: 16px;
+            background: #f5f5f5;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .answer:hover {
+            background: #e8eaf6;
+        }
+
+        .answer input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .answer label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .answer.selected {
+            background: #e8eaf6;
+            border-color: #667eea;
+        }
+
+        .answer.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .answer.wrong {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        /* Кнопки */
+        .test-nav {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 16px;
+            background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.95);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Результат */
+        .result-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .result-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .result-score {
+            font-size: 48px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .result-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .result-details {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .result-stat {
+            text-align: center;
+        }
+
+        .result-stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .result-stat-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .pass {
+            color: #4caf50;
+        }
+
+        .fail {
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Заголовок теста -->
+        <div class="test-header">
+            <div class="test-title" id="testTitle">📝 Тест по Модулю 1</div>
+            <div class="test-progress" id="testProgress">Вопрос 1 из 5</div>
+        </div>
+
+        <!-- Контейнер для вопросов -->
+        <div id="questionContainer">
+            <!-- Вопросы будут добавлены динамически -->
+        </div>
+
+        <!-- Кнопки навигации -->
+        <div class="test-nav">
+            <button class="btn-submit" id="btnSubmit" onclick="submitTest()">
+                Завершить тест
+            </button>
+        </div>
+
+        <!-- Результат (скрыт по умолчанию) -->
+        <div id="resultContainer" style="display: none;">
+            <!-- Результат будет показан после завершения теста -->
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.BackButton.show();
+        tg.BackButton.onClick(() => {
+            window.history.back();
+        });
+
+        // Получаем ID модуля из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const moduleId = parseInt(urlParams.get('module')) || 1;
+
+        // Данные тестов
+        const testData = {
+            1: {
+                name: 'О компании RUDEX',
+                questions: [
+                    {
+                        question: 'В каком году была основана компания RUDEX?',
+                        answers: [
+                            { text: '2010', correct: false },
+                            { text: '2014', correct: true },
+                            { text: '2018', correct: false },
+                            { text: '2020', correct: false }
+                        ]
+                    },
+                    {
+                        question: 'Сколько преимуществ у компании RUDEX?',
+                        answers: [
+                            { text: '5', correct: false },
+                            { text: '6', correct: false },
+                            { text: '8', correct: true },
+                            { text: '10', correct: false }
+                        ]
+                    },
+                    {
+                        question: 'В каком году RUDEX вышла на маркетплейс OZON?',
+                        answers: [
+                            { text: '2022', correct: false },
+                            { text: '2023', correct: false },
+                            { text: '2024', correct: true },
+                            { text: '2025', correct: false }
+                        ]
+                    },
+                    {
+                        question: 'Какой ключевой объект RUDEX установила в Химках?',
+                        answers: [
+                            { text: 'Торговый центр', correct: false },
+                            { text: 'ЗАГС', correct: true },
+                            { text: 'Больница', correct: false },
+                            { text: 'Аэропорт', correct: false }
+                        ]
+                    },
+                    {
+                        question: 'Что является главным преимуществом RUDEX?',
+                        answers: [
+                            { text: 'Только низкие цены', correct: false },
+                            { text: 'Комплексный подход и качество', correct: true },
+                            { text: 'Только скорость', correct: false },
+                            { text: 'Только широкий ассортимент', correct: false }
+                        ]
+                    }
+                ]
+            },
+            2: {
+                name: 'Продукты RUDEX',
+                questions: [
+                    { 
+                        question: 'Какие стандартные размеры входных дверей?',
+                        answers: [
+                            { text: '800×2000 и 900×2000', correct: false },
+                            { text: '880×2050 и 960×2050', correct: true },
+                            { text: '850×2100 и 950×2100', correct: false },
+                            { text: '900×2200 и 1000×2200', correct: false }
+                        ]
+                    }
+                    // Добавьте остальные вопросы
+                ]
+            }
+        };
+
+        let userAnswers = [];
+        let currentTest = null;
+
+        // Инициализация теста
+        function initTest() {
+            currentTest = testData[moduleId];
+            if (!currentTest) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            document.getElementById('testTitle').textContent = `📝 Тест: ${currentTest.name}`;
+            document.getElementById('testProgress').textContent = `${currentTest.questions.length} вопросов`;
+
+            renderQuestions();
+        }
+
+        // Отрисовка вопросов
+        function renderQuestions() {
+            const container = document.getElementById('questionContainer');
+            container.innerHTML = '';
+
+            currentTest.questions.forEach((q, qIndex) => {
+                const questionCard = document.createElement('div');
+                questionCard.className = 'question-card';
+                questionCard.innerHTML = `
+                    <div class="question-number">Вопрос ${qIndex + 1} из ${currentTest.questions.length}</div>
+                    <div class="question-text">${q.question}</div>
+                    <div class="answers" data-question="${qIndex}">
+                        ${q.answers.map((a, aIndex) => `
+                            <div class="answer" onclick="selectAnswer(${qIndex}, ${aIndex})">
+                                <input type="radio" 
+                                       id="q${qIndex}_a${aIndex}" 
+                                       name="question${qIndex}" 
+                                       value="${aIndex}">
+                                <label for="q${qIndex}_a${aIndex}">${a.text}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(questionCard);
+            });
+        }
+
+        // Выбор ответа
+        function selectAnswer(questionIndex, answerIndex) {
+            // Снимаем выделение со всех ответов этого вопроса
+            const answersContainer = document.querySelector(`[data-question="${questionIndex}"]`);
+            answersContainer.querySelectorAll('.answer').forEach(a => {
+                a.classList.remove('selected');
+            });
+
+            // Выделяем выбранный ответ
+            const selectedAnswer = answersContainer.children[answerIndex];
+            selectedAnswer.classList.add('selected');
+
+            // Отмечаем radio button
+            const radio = selectedAnswer.querySelector('input[type="radio"]');
+            radio.checked = true;
+
+            // Сохраняем ответ
+            userAnswers[questionIndex] = answerIndex;
+
+            // Проверяем, все ли вопросы отвечены
+            checkAllAnswered();
+        }
+
+        // Проверка, отвечены ли все вопросы
+        function checkAllAnswered() {
+            const allAnswered = userAnswers.length === currentTest.questions.length &&
+                              userAnswers.every(a => a !== undefined);
+            
+            document.getElementById('btnSubmit').disabled = !allAnswered;
+        }
+
+        // Отправка теста
+        function submitTest() {
+            // Подсчитываем правильные ответы
+            let correctCount = 0;
+            currentTest.questions.forEach((q, index) => {
+                if (userAnswers[index] !== undefined && q.answers[userAnswers[index]].correct) {
+                    correctCount++;
+                }
+            });
+
+            const totalQuestions = currentTest.questions.length;
+            const percentage = Math.round((correctCount / totalQuestions) * 100);
+            const passed = percentage >= 60;
+
+            // Показываем результат
+            showResult(correctCount, totalQuestions, percentage, passed);
+
+            // Сохраняем результат
+            saveTestResult(passed, percentage, correctCount);
+        }
+
+        // Показ результата
+        function showResult(correct, total, percentage, passed) {
+            document.getElementById('questionContainer').style.display = 'none';
+            document.querySelector('.test-nav').style.display = 'none';
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.style.display = 'block';
+            resultContainer.innerHTML = `
+                <div class="result-card">
+                    <div class="result-icon">${passed ? '🎉' : '😔'}</div>
+                    <div class="result-title ${passed ? 'pass' : 'fail'}">
+                        ${passed ? 'Тест пройден!' : 'Тест не пройден'}
+                    </div>
+                    <div class="result-score ${passed ? 'pass' : 'fail'}">
+                        ${percentage}%
+                    </div>
+                    <div class="result-message">
+                        ${passed ? 
+                            'Поздравляем! Вы успешно прошли тест и можете переходить к следующему модулю.' : 
+                            'Вы набрали меньше 60%. Изучите материал ещё раз и попробуйте снова.'}
+                    </div>
+                    <div class="result-details">
+                        <div class="result-stat">
+                            <span class="result-stat-value pass">${correct}</span>
+                            <span class="result-stat-label">Правильно</span>
+                        </div>
+                        <div class="result-stat">
+                            <span class="result-stat-value fail">${total - correct}</span>
+                            <span class="result-stat-label">Ошибок</span>
+                        </div>
+                    </div>
+                    <div class="test-nav">
+                        ${passed ? 
+                            `<button class="btn-submit" onclick="goToNextModule()">
+                                Следующий модуль ➡️
+                            </button>` :
+                            `<button class="btn-submit" onclick="retryTest()">
+                                🔄 Пройти заново
+                            </button>`
+                        }
+                        <button class="btn-submit" onclick="goToHome()" style="background: #667eea;">
+                            🏠 Главная
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            window.scrollTo(0, 0);
+        }
+
+        // Сохранение результата теста
+        function saveTestResult(passed, percentage, correct) {
+            // Отправка данных через Telegram Bot API
+            tg.sendData(JSON.stringify({
+                action: 'save_test_result',
+                moduleId: moduleId,
+                passed: passed,
+                percentage: percentage,
+                correct: correct,
+                total: currentTest.questions.length
+            }));
+
+            console.log('Результат теста сохранён:', { passed, percentage, correct });
+        }
+
+        // Навигация
+        function retryTest() {
+            userAnswers = [];
+            document.getElementById('questionContainer').style.display = 'block';
+            document.querySelector('.test-nav').style.display = 'flex';
+            document.getElementById('resultContainer').style.display = 'none';
+            renderQuestions();
+        }
+
+        function goToNextModule() {
+            const nextModule = moduleId + 1;
+            if (nextModule <= 4) {
+                window.location.href = `module.html?id=${nextModule}`;
+            } else {
+                window.location.href = 'certificate.html';
+            }
+        }
+
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        // Запуск теста
+        initTest();
+    </script>
+</body>
+</html>

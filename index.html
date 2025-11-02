@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RUDEX Training</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Заголовок -->
+        <header class="header">
+            <h1>🎓 Обучение RUDEX</h1>
+            <p class="subtitle">Система обучения для менеджеров</p>
+        </header>
+
+        <!-- Прогресс пользователя -->
+        <div class="progress-card">
+            <div class="progress-header">
+                <span class="progress-label">Общий прогресс</span>
+                <span class="progress-percent" id="totalProgress">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            <div class="progress-stats">
+                <span>📚 <span id="completedModules">0</span>/4 модулей</span>
+                <span>✅ <span id="completedBlocks">0</span>/14 блоков</span>
+            </div>
+        </div>
+
+        <!-- Модули -->
+        <div class="modules">
+            <!-- Модуль 1 -->
+            <div class="module-card" data-module="1">
+                <div class="module-header">
+                    <div class="module-icon">📖</div>
+                    <div class="module-info">
+                        <h3>Модуль 1: О компании</h3>
+                        <p class="module-desc">История, преимущества, партнёры</p>
+                    </div>
+                    <div class="module-status" data-status="locked">
+                        <span class="status-icon">🔓</span>
+                    </div>
+                </div>
+                <div class="module-progress">
+                    <div class="module-progress-bar">
+                        <div class="module-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span class="module-progress-text">0/4 блоков</span>
+                </div>
+                <div class="module-footer">
+                    <button class="btn-primary" onclick="openModule(1)">
+                        Начать обучение
+                    </button>
+                </div>
+            </div>
+
+            <!-- Модуль 2 -->
+            <div class="module-card" data-module="2">
+                <div class="module-header">
+                    <div class="module-icon">🚪</div>
+                    <div class="module-info">
+                        <h3>Модуль 2: Продукты</h3>
+                        <p class="module-desc">Двери, окна, покрытия, перегородки</p>
+                    </div>
+                    <div class="module-status" data-status="locked">
+                        <span class="status-icon">🔒</span>
+                    </div>
+                </div>
+                <div class="module-progress">
+                    <div class="module-progress-bar">
+                        <div class="module-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span class="module-progress-text">0/6 блоков</span>
+                </div>
+                <div class="module-footer">
+                    <button class="btn-secondary" onclick="openModule(2)" disabled>
+                        🔒 Завершите Модуль 1
+                    </button>
+                </div>
+            </div>
+
+            <!-- Модуль 3 -->
+            <div class="module-card" data-module="3">
+                <div class="module-header">
+                    <div class="module-icon">💰</div>
+                    <div class="module-info">
+                        <h3>Модуль 3: Услуги и цены</h3>
+                        <p class="module-desc">Прайс-лист, замеры, монтаж</p>
+                    </div>
+                    <div class="module-status" data-status="locked">
+                        <span class="status-icon">🔒</span>
+                    </div>
+                </div>
+                <div class="module-progress">
+                    <div class="module-progress-bar">
+                        <div class="module-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span class="module-progress-text">0/2 блоков</span>
+                </div>
+                <div class="module-footer">
+                    <button class="btn-secondary" onclick="openModule(3)" disabled>
+                        🔒 Завершите Модуль 2
+                    </button>
+                </div>
+            </div>
+
+            <!-- Модуль 4 -->
+            <div class="module-card" data-module="4">
+                <div class="module-header">
+                    <div class="module-icon">💬</div>
+                    <div class="module-info">
+                        <h3>Модуль 4: Техника продаж</h3>
+                        <p class="module-desc">Алгоритм работы, цикл сделки</p>
+                    </div>
+                    <div class="module-status" data-status="locked">
+                        <span class="status-icon">🔒</span>
+                    </div>
+                </div>
+                <div class="module-progress">
+                    <div class="module-progress-bar">
+                        <div class="module-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span class="module-progress-text">0/3 блоков</span>
+                </div>
+                <div class="module-footer">
+                    <button class="btn-secondary" onclick="openModule(4)" disabled>
+                        🔒 Завершите Модуль 3
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Нижнее меню -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" onclick="showHome()">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Главная</span>
+            </button>
+            <button class="nav-btn" onclick="showProgress()">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Прогресс</span>
+            </button>
+            <button class="nav-btn" onclick="showCertificate()">
+                <span class="nav-icon">🏆</span>
+                <span class="nav-label">Сертификат</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
